@@ -11,7 +11,7 @@ def parancssor():
     bemenet = input("> ")
 
     if bemenet == "export":
-        print()
+        parancsExport()
         parancssor()
     elif bemenet == "belep":
         parancsBelep()
@@ -66,6 +66,23 @@ def parancsKilep():
         open(kartya_fajl_nev, "a", encoding="windows-1252").write(f'\nKI;{datetime.now().strftime("%Y-%m-%d %H:%M:%S")};~')
     else:
         print("Először nyiss egy munkaidőt!")
+
+def parancsExport():
+    kimeneti_fajl = open(f'{kartya_fajl_nev}_export.html', "w", encoding="utf-8")
+    kimeneti_fajl.write("<html><body><h1>Munkaidő jelentés - export</h1>")
+    kimeneti_fajl.write(f'<p><b>Felhasználó neve:</b> {kartya_adatok_fejlec[0]}</p><p><b>Projekt neve:</b> {kartya_adatok_fejlec[1]}</p>')
+    kimeneti_fajl.write("<table border=1><tr><th>Be/Ki</th><th>Időpont</th><th>Munkaleírás</th><th colspan=2>Munkaidő</th></tr>")
+    tempdate = datetime.now()
+    total_sec = 0
+    for x in kartya_adatok_torzs:
+        if x[0] == "BE":
+            kimeneti_fajl.write(f'<tr><td>{x[0]}</td><td>{x[1]}</td><td rowspan=2>{x[2]}</td><td><i>Másodperc</i></td><td><i>Perc</i></td></tr>')
+            tempdate = datetime.fromisoformat(x[1])
+        else:
+            kimeneti_fajl.write(f'<tr><td>{x[0]}</td><td>{x[1]}</td><td>{round(((datetime.fromisoformat(x[1])-tempdate).total_seconds()),2)}</td><td>{round(((datetime.fromisoformat(x[1])-tempdate).total_seconds()/60),2)}</td></tr>')
+            kimeneti_fajl.write(f'<tr><td colspan=5></td></tr>')
+            total_sec += (datetime.fromisoformat(x[1])-tempdate).total_seconds()
+    kimeneti_fajl.write(f'<tr><td colspan=5><b>Teljes munkaidő: </b>{round((total_sec/60)/60,2)} óra // {round((total_sec/60),2)} perc</td></tr></table><p>Generálás időpontja: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p></body></html>')
 
 if __name__ == "__main__":
     print("### PyMunkaido - Lyukkártya stílusú munkaidő nyilvántartó rendszer ###")
